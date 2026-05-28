@@ -556,13 +556,22 @@ export default function Register() {
           </div>
 
           {/* ── Avatar — overlapping banner ── */}
-          <div className="flex justify-center -mt-10 mb-2 relative z-10">
-            <AvatarPicker
-              preview={avatarPreview}
-              onFile={handleAvatarFile}
-              disabled={loading}
-            />
-          </div>
+          <AnimatePresence>
+            {role === "student" && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex justify-center -mt-10 mb-2 relative z-10"
+              >
+                <AvatarPicker
+                  preview={avatarPreview}
+                  onFile={handleAvatarFile}
+                  disabled={loading}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* ── Form body ── */}
           <div className="px-6 pt-2 pb-7 space-y-4">
@@ -661,8 +670,8 @@ export default function Register() {
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { id: "student", label: "طالب"},
-                    { id: "teacher", label: "مدرس"},
+                    { id: "student", label: "طالب" },
+                    { id: "teacher", label: "مدرس" },
                   ].map(({ id, label }) => (
                     <button
                       key={id}
@@ -681,7 +690,7 @@ export default function Register() {
                           className="absolute inset-0 bg-indigo-500/5 rounded-2xl"
                         />
                       )}
-                      
+
                       <span className="font-semibold text-sm">{label}</span>
                       {role === id && (
                         <span className="ml-auto w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0" />
