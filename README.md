@@ -16,10 +16,8 @@ The Teacher Dashboard is a comprehensive web application designed to help educat
 
 ## Technology Stack
 
-- **Frontend**: React.js with modern JavaScript (ES6+)
+- **Frontend**: next.js with modern JavaScript (ES6+)
 - **Styling**: CSS3 and responsive design framework
-- **State Management**: React Hooks and Context API
-- **Build Tool**: Create React App
 - **Version Control**: Git
 
 ## Installation
@@ -40,7 +38,7 @@ The Teacher Dashboard is a comprehensive web application designed to help educat
 3. Start the development server:
 
    ```bash
-   npm start
+   npm run dev
    ```
 
 4. Open your browser and navigate to `http://localhost:3000`
