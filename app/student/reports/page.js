@@ -41,9 +41,13 @@ const CustomTooltip = ({ active, payload }) => {
 export default function StudentReports() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMonth, setSelectedMonth] = useState(
-    new Date().toISOString().slice(0, 7)
-  );
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}`;
+  });
 
   // ── Fetch ──
   useEffect(() => {
@@ -103,9 +107,11 @@ export default function StudentReports() {
   const months = useMemo(
     () =>
       Array.from({ length: 12 }, (_, i) => {
-        const d = new Date();
-        d.setMonth(d.getMonth() - i);
-        return d.toISOString().slice(0, 7);
+        const now = new Date();
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1); // ← دايماً يوم 1
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        return `${year}-${month}`;
       }),
     []
   );
@@ -116,7 +122,10 @@ export default function StudentReports() {
         const d = r.submittedAt?.toDate
           ? r.submittedAt.toDate()
           : new Date(r.submittedAt);
-        return d?.toISOString().slice(0, 7) === selectedMonth;
+        if (!d) return false;
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        return `${year}-${month}` === selectedMonth;
       }),
     [results, selectedMonth]
   );

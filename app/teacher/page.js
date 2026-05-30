@@ -127,98 +127,80 @@ export default function TeacherDashboard() {
         router.push("/login"); // أو أي صفحة تسجيل دخول
         return;
       }
-  
+
       const teacherId = user.uid;
-  
+
       try {
         // جلب بيانات المدرس
         const userDoc = await getDoc(doc(db, "users", teacherId));
-  
+
         if (userDoc.exists()) {
           setTeacherData({
             id: userDoc.id,
             ...userDoc.data(),
           });
         }
-  
+
         // الامتحانات
         const examsSnap = await getDocs(
-          query(
-            collection(db, "exams"),
-            where("teacherId", "==", teacherId)
-          )
+          query(collection(db, "exams"), where("teacherId", "==", teacherId))
         );
-  
+
         const exams = examsSnap.docs.map((d) => ({
           id: d.id,
           ...d.data(),
         }));
-  
-        const published = exams.filter(
-          (e) => e.status === "published"
-        ).length;
-  
+
+        const published = exams.filter((e) => e.status === "published").length;
+
         const sortedExams = exams
-          .sort(
-            (a, b) =>
-              getDate(b.createdAt) - getDate(a.createdAt)
-          )
+          .sort((a, b) => getDate(b.createdAt) - getDate(a.createdAt))
           .slice(0, 5);
-  
+
         setRecentExams(sortedExams);
-  
+
         // النتائج
         let results = [];
         const uniqueStudents = new Set();
-  
+
         let totalScore = 0;
         let maxTotal = 0;
-  
+
         const examsMap = {};
-  
+
         exams.forEach((e) => {
           examsMap[e.id] = e.title;
         });
-  
+
         const allResSnap = await getDocs(
-          query(
-            collection(db, "results"),
-            where("teacherId", "==", teacherId)
-          )
+          query(collection(db, "results"), where("teacherId", "==", teacherId))
         );
-  
+
         allResSnap.docs.forEach((d) => {
           const data = d.data();
-  
+
           results.push({
             id: d.id,
             ...data,
-            examTitle:
-              examsMap[data.examId] || "امتحان محذوف",
+            examTitle: examsMap[data.examId] || "امتحان محذوف",
           });
-  
+
           uniqueStudents.add(data.studentId);
-  
+
           totalScore += data.score || 0;
           maxTotal += data.maxScore || 0;
         });
-  
-        results.sort(
-          (a, b) =>
-            getDate(b.submittedAt) -
-            getDate(a.submittedAt)
-        );
-  
+
+        results.sort((a, b) => getDate(b.submittedAt) - getDate(a.submittedAt));
+
         setRecentResults(results.slice(0, 5));
-  
+
         setStats({
           total: exams.length,
           published,
           students: uniqueStudents.size,
           avgScore:
-            maxTotal > 0
-              ? Math.round((totalScore / maxTotal) * 100)
-              : 0,
+            maxTotal > 0 ? Math.round((totalScore / maxTotal) * 100) : 0,
         });
       } catch (err) {
         console.error("Dashboard fetch error:", err);
@@ -226,7 +208,7 @@ export default function TeacherDashboard() {
         setLoading(false);
       }
     });
-  
+
     return () => unsubscribe();
   }, [router]);
 
@@ -328,35 +310,38 @@ export default function TeacherDashboard() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 overflow-hidden"
+            className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-5 overflow-hidden"
           >
+            {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                <Users className="w-5 h-5 text-indigo-600" />
+              <h3 className="font-semibold text-gray-800 text-sm sm:text-base flex items-center gap-2">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                 إدارة المجموعات
               </h3>
               <button
                 onClick={() => setIsManagingGroups(false)}
-                className="text-gray-400 hover:text-gray-600 transition"
+                className="text-gray-400 hover:text-gray-600 transition p-1 rounded-lg hover:bg-gray-100"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
             {/* Current Groups */}
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mb-4 max-h-32 overflow-y-auto">
               {teacherData.groups?.length > 0 ? (
                 teacherData.groups.map((group, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium"
+                    className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-xs sm:text-sm font-medium"
                   >
-                    <GraduationCap className="w-3.5 h-3.5" />
-                    {group}
+                    <GraduationCap className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                    <span className="max-w-[100px] sm:max-w-[160px] truncate">
+                      {group}
+                    </span>
                     <button
                       onClick={() => handleRemoveGroup(group)}
                       disabled={groupLoading}
-                      className="ml-1 hover:text-rose-500 disabled:opacity-50 transition"
+                      className="ml-0.5 sm:ml-1 hover:text-rose-500 disabled:opacity-50 transition shrink-0"
                       title="حذف المجموعة"
                     >
                       <X className="w-3 h-3" />
@@ -364,7 +349,9 @@ export default function TeacherDashboard() {
                   </span>
                 ))
               ) : (
-                <p className="text-gray-400 text-sm">لا توجد مجموعات مضافة</p>
+                <p className="text-gray-400 text-xs sm:text-sm">
+                  لا توجد مجموعات مضافة
+                </p>
               )}
             </div>
 
@@ -374,22 +361,22 @@ export default function TeacherDashboard() {
                 type="text"
                 value={newGroup}
                 onChange={(e) => setNewGroup(e.target.value)}
-                placeholder="اسم المجموعة الجديدة..."
+                placeholder="اسم المجموعة..."
                 onKeyDown={(e) => e.key === "Enter" && handleAddGroup()}
-                className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition"
+                className="flex-1 min-w-0 px-3 sm:px-4 py-2 sm:py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition"
                 disabled={groupLoading}
               />
               <button
                 onClick={handleAddGroup}
                 disabled={!newGroup.trim() || groupLoading}
-                className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition"
+                className="shrink-0 px-3 sm:px-4 py-2 sm:py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 sm:gap-2 transition text-xs sm:text-sm"
               >
                 {groupLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />
                 ) : (
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 )}
-                إضافة
+                <span className="hidden xs:inline sm:inline">إضافة</span>
               </button>
             </div>
           </motion.div>

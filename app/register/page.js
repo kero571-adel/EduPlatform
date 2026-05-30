@@ -388,6 +388,12 @@ export default function Register() {
   const updateGroup = (i, v) =>
     setGroups((p) => p.map((g, x) => (x === i ? v : g)));
 
+  const generateUniqueTeacherId = () => {
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    return `TCH-${timestamp}-${randomStr}`.toUpperCase();
+  };
+
   /* ── submit ── */
   const handleRegister = async (e) => {
     e.preventDefault();
